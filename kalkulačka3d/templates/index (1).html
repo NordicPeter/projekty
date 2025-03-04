@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulačka 3D objektů</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Kalkulačka 3D objektů</h2>
+        <label for="jednotky">Vyber jednotky:</label>
+        <select id="jednotky">
+            <option value="mm">Milimetry (mm)</option>
+            <option value="cm">Centimetry (cm)</option>
+            <option value="dm">Decimetry (dm)</option>
+            <option value="m">Metry (m)</option>
+            <option value="km">Kilometry (km)</option>
+        </select>
+        <br>
+        <label for="tvar">Vyber objekt:</label>
+        <select id="tvar" onchange="zobrazVstupy()">
+            <option value="kvadr">Kvadr</option>
+            <option value="krychle">Krychle</option>
+            <option value="koule">Koule</option>
+        </select>
+        <div id="rozmery"></div>
+        <button onclick="vypocitat()">Vypočítat</button>
+        <h3 id="vysledek"></h3>
+    </div>
+
+    <script>
+        function zobrazVstupy() {
+            let tvar = document.getElementById("tvar").value;
+            let rozmery = document.getElementById("rozmery");
+            rozmery.innerHTML = "";
+
+            if (tvar === "kvadr") {
+                rozmery.innerHTML = `<input id="a" type="number" placeholder="Strana A">
+                                     <input id="b" type="number" placeholder="Strana B">
+                                     <input id="c" type="number" placeholder="Strana C">`;
+            } else if (tvar === "krychle") {
+                rozmery.innerHTML = `<input id="a" type="number" placeholder="Strana A">`;
+            } else if (tvar === "koule") {
+                rozmery.innerHTML = `<input id="r" type="number" placeholder="Poloměr">`;
+            }
+        }
+
+        function vypocitat() {
+            let tvar = document.getElementById("tvar").value;
+            let jednotky = document.getElementById("jednotky").value;
+            let data = { tvar, jednotky };
+
+            if (tvar === "kvadr") {
+                data.a = document.getElementById("a").value;
+                data.b = document.getElementById("b").value;
+                data.c = document.getElementById("c").value;
+            } else if (tvar === "krychle") {
+                data.a = document.getElementById("a").value;
+            } else if (tvar === "koule") {
+                data.r = document.getElementById("r").value;
+            }
+
+            fetch("/vypocet", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("vysledek").innerText = data.vysledek || data.error;
+            });
+        }
+    </script>
+</body>
+</html>
